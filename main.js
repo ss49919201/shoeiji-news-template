@@ -1,3 +1,5 @@
+import * as fs from 'node:fs';
+
 function format(content1, content2, content3) {
   return `<!doctype html>
 <html lang="ja">
@@ -24,7 +26,7 @@ function format(content1, content2, content3) {
 }
 
 function validate(s) {
-  return s.length < 1
+  return s.length < 300
 }
 
 const contents = ["", "", ""];
@@ -36,4 +38,11 @@ contents.forEach((v) => {
   };
 });
 
-console.log(format(...contents));
+// console.log(format(...contents));
+const date = new Date();
+const formattedDate = new Intl.DateTimeFormat('ja-JP', {
+  dateStyle: 'medium',
+  timeStyle: 'medium'
+}).format(date).replace(/[\/: ]/g, '');
+fs.mkdirSync(`./${formattedDate}`);
+fs.writeFileSync(`./${formattedDate}/index.html`, format(...contents));
