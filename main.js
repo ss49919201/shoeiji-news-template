@@ -8,15 +8,26 @@ function formatHTML(templateHTML, content1, content2, content3) {
 }
 
 function validate(s) {
-  return s.length < 300
+  // 未実装
+  return s.length === 0
 }
 
 function validateContents(content1, content2, content3) {
-  [content1, content2, content3].forEach((v) => {
-    if (!validate(v)) {
-      throw new Error("文字列が不正です")
-    };
+  const invalidContents = [content1, content2, content3].flatMap((v) => {
+    return validate(v) ? [] : v;
   });
+  if (invalidContents.length > 0) {
+    return {
+      errorOccurred: true,
+      errorString: 'error occurred',
+      errorContents: invalidContents
+    }
+  };
+  return {
+    errorOccurred: false,
+    errorString: '',
+    errorContents: []
+  }
 }
 
 function formatDate(date) {
@@ -26,11 +37,20 @@ function formatDate(date) {
   }).format(date).replace(/[\/: ]/g, '');
 }
 
-const contents = ["", "", ""];
-const templateHTML = fs.readFileSync('./template.html', {encoding: 'utf8'});
-validateContents(...contents);
-const date = new Date();
-const formattedDate = formatDate(date)
-const formattedHTML = formatHTML(templateHTML, ...contents);
-fs.mkdirSync(`./${formattedDate}`);
-fs.writeFileSync(`./${formattedDate}/index.html`, formattedHTML);
+function main() {
+  const contents = ["a", "b", "c"];
+  const templateHTML = fs.readFileSync('./template.html', {encoding: 'utf8'});
+  const validateResult = validateContents(...contents);
+  if (validateResult.errorOccurred) {
+    console.log(validateResult.errorString);
+    console.log(validateResult.errorContents);
+    return;
+  };
+  const date = new Date();
+  const formattedDate = formatDate(date)
+  const formattedHTML = formatHTML(templateHTML, ...contents);
+  fs.mkdirSync(`./${formattedDate}`);
+  fs.writeFileSync(`./${formattedDate}/index.html`, formattedHTML);
+}
+
+main();
