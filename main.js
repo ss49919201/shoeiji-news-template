@@ -19,7 +19,7 @@ function validateContents(content1, content2, content3) {
   if (invalidContents.length > 0) {
     return {
       errorOccurred: true,
-      errorString: 'error occurred',
+      errorString: 'Contains invalid contents',
       errorContents: invalidContents
     }
   };
@@ -42,9 +42,8 @@ function main() {
   const templateHTML = fs.readFileSync('./template.html', {encoding: 'utf8'});
   const validateResult = validateContents(...contents);
   if (validateResult.errorOccurred) {
-    console.log(validateResult.errorString);
-    console.log(validateResult.errorContents);
-    return;
+    console.error(validateResult.errorString);
+    process.exit(1);
   };
   const date = new Date();
   const formattedDate = formatDate(date)
