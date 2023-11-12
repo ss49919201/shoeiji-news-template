@@ -1,4 +1,4 @@
-import * as fs from 'node:fs';
+import * as fs from 'node:fs/promises';
 
 function formatHTML(templateHTML, content1, content2, content3) {
   return templateHTML.
@@ -37,9 +37,21 @@ function formatDate(date) {
   }).format(date).replace(/[\/: ]/g, '');
 }
 
+async function generateHTML(formattedHTML, formattedDate) {
+  try {
+    await fs.mkdir(`./${formattedDate}`);
+    await fs.writeFile(`./${formattedDate}/index.html`, formattedHTML);
+  } catch (err) {
+    throw err;
+  }
+}
+
 function main() {
   const contents = ["a", "b", "c"];
-  const templateHTML = fs.readFileSync('./template.html', {encoding: 'utf8'});
+  const templateHTML = fs.readFile('./template.html', {encoding: 'utf8'}).
+    catch(
+
+  );
   const validateResult = validateContents(...contents);
   if (validateResult.errorOccurred) {
     console.error(validateResult.errorString);
@@ -48,8 +60,11 @@ function main() {
   const date = new Date();
   const formattedDate = formatDate(date)
   const formattedHTML = formatHTML(templateHTML, ...contents);
-  fs.mkdirSync(`./${formattedDate}`);
-  fs.writeFileSync(`./${formattedDate}/index.html`, formattedHTML);
+  generateHTML(formattedHTML, formattedDate).
+    catch(err => {
+      console.error(err.message);
+      process.exit(1);
+    });
 }
 
 main();
