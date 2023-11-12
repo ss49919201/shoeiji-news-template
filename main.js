@@ -40,7 +40,7 @@ function formatDate(date) {
 async function generateHTML(formattedHTML, formattedDate) {
   try {
     await fs.mkdir(`./${formattedDate}`);
-    await fs.writeFile(`./${formattedDate}/index.html`, formattedHTML);
+    await fs.writeFile(`./generated/${formattedDate}/index.html`, formattedHTML);
   } catch (err) {
     throw err;
   }
