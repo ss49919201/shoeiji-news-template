@@ -46,12 +46,34 @@ async function generateHTML(formattedHTML, formattedDate) {
   }
 }
 
-function main() {
-  const contents = ["a", "b", "c"];
-  const templateHTML = fs.readFile('./template.html', {encoding: 'utf8'}).
-    catch(
+async function generateRawContents(jsonFilePath) {
+  try {
+    const json = await fs.readFile(jsonFilePath);
+    const contents = JSON.parse(json);
 
-  );
+    const requiredKeys = ['content1', 'content2', 'content3']
+    const insufficientKeys = requiredKeys.filter((k) => { return !contents.hasOwnProperty(k); });
+    if (insufficientKeys.length > 0) {
+      throw new Error(`${insufficientKeys.join(', ')} is/are required`);
+    }
+
+    return requiredKeys.map(k => contents[k]);
+  } catch (err) {
+    throw err;
+  }
+}
+
+async function main() {
+  const contents = await generateRawContents('./contents.json').
+    catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
+  const templateHTML = await fs.readFile('./template.html', {encoding: 'utf8'}).
+    catch(err => {
+      console.error(err);
+      process.exit(1);
+    });
   const validateResult = validateContents(...contents);
   if (validateResult.errorOccurred) {
     console.error(validateResult.errorString);
