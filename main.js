@@ -7,27 +7,18 @@ function formatHTML(templateHTML, content1, content2, content3) {
     replace('${content3}', content3);
 }
 
-function validate(s) {
+function isValid(s) {
   // 未実装
   return s.length === 0
 }
 
 function validateContents(content1, content2, content3) {
-  const invalidContents = [content1, content2, content3].flatMap((v) => {
-    return validate(v) ? [] : v;
+  const invalidContents = [content1, content2, content3].filter((v) => {
+    return !isValid(v);
   });
   if (invalidContents.length > 0) {
-    return {
-      errorOccurred: true,
-      errorString: 'Contains invalid contents',
-      errorContents: invalidContents
-    }
+    throw new Error(`${invalidContents.join(', ')} is/are invalid`);
   };
-  return {
-    errorOccurred: false,
-    errorString: '',
-    errorContents: []
-  }
 }
 
 function formatDate(date) {
@@ -39,7 +30,7 @@ function formatDate(date) {
 
 async function generateHTML(formattedHTML, formattedDate) {
   try {
-    await fs.mkdir(`./${formattedDate}`);
+    await fs.mkdir(`./generated/${formattedDate}`);
     await fs.writeFile(`./generated/${formattedDate}/index.html`, formattedHTML);
   } catch (err) {
     throw err;
@@ -52,7 +43,7 @@ async function generateRawContents(jsonFilePath) {
     const contents = JSON.parse(json);
 
     const requiredKeys = ['content1', 'content2', 'content3']
-    const insufficientKeys = requiredKeys.filter((k) => { return !contents.hasOwnProperty(k); });
+    const insufficientKeys = requiredKeys.filter((k) => {return !contents.hasOwnProperty(k);});
     if (insufficientKeys.length > 0) {
       throw new Error(`${insufficientKeys.join(', ')} is/are required`);
     }
@@ -74,11 +65,12 @@ async function main() {
       console.error(err);
       process.exit(1);
     });
-  const validateResult = validateContents(...contents);
-  if (validateResult.errorOccurred) {
-    console.error(validateResult.errorString);
+  try {
+    validateContents(...contents)
+  } catch (err) {
+    console.error(err);
     process.exit(1);
-  };
+  }
   const date = new Date();
   const formattedDate = formatDate(date)
   const formattedHTML = formatHTML(templateHTML, ...contents);
