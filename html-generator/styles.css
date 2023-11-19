@@ -2,6 +2,7 @@
   margin: 10px;
   border: 5px solid #0A0400;
   box-sizing: border-box;
+  width: 100%;
 }
 
 .header {
